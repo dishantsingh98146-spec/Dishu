@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday 🎉</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: black;
+  overflow: hidden;
+  font-family: 'Segoe Script', cursive;
+}
+
+/* ===== CUSTOMIZE HERE ===== */
+:root {
+  --name: "chiji Jii";
+  --message: "Wishing you happiness, smiles & love for ever ❤️";
+}
+
+/* Center Content */
+.container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  text-align: center;
+}
+
+/* Glowing Text */
+.title {
+  color: white;
+  font-size: 2.4rem;
+  text-shadow: 0 0 10px pink, 0 0 30px deeppink;
+  animation: glow 2s infinite alternate;
+}
+
+.subtitle {
+  color: pink;
+  margin-top: 10px;
+  font-size: 1.1rem;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px pink; }
+  to { text-shadow: 0 0 35px deeppink; }
+}
+
+/* Button */
+.btn {
+  margin-top: 20px;
+  padding: 12px 28px;
+  background: hotpink;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 0 15px pink;
+}
+
+/* Cake + Knife */
+.cake-area {
+  margin-top: 25px;
+  font-size: 80px;
+  display: none;
+  position: relative;
+}
+
+.knife {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 40px;
+  animation: cut 2s ease-in-out forwards;
+}
+
+@keyframes cut {
+  0% { top: -40px; }
+  100% { top: 40px; }
+}
+
+/* Hearts */
+.heart {
+  position: absolute;
+  animation: floatUp 6s linear infinite;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(100vh); opacity: 1; }
+  to { transform: translateY(-10vh); opacity: 0; }
+}
+
+/* Canvas */
+canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* QR */
+#qrcode {
+  margin-top: 15px;
+  background: white;
+  padding: 8px;
+  border-radius: 8px;
+  display: none;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .title { font-size: 1.8rem; }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="fireworks"></canvas>
+<canvas id="confetti"></canvas>
+
+<div class="container">
+  <div class="title">Happy Birthday <span id="name"></span> ❤️</div>
+  <div class="subtitle" id="msg"></div>
+
+  <button class="btn" onclick="celebrate()">Celebrate 🎂</button>
+
+  <div class="cake-area" id="cakeArea">
+    🎂
+    <div class="knife">🔪</div>
+  </div>
+
+  <div id="qrcode"></div>
+</div>
+
+<!-- Music -->
+<audio id="music" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c9e6d4c33.mp3" type="audio/mpeg">
+</audio>
+
+<!-- QR Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+/* ===== TEXT SETUP ===== */
+document.getElementById("name").innerText =
+  getComputedStyle(document.documentElement).getPropertyValue('--name').replace(/"/g,'');
+
+document.getElementById("msg").innerText =
+  getComputedStyle(document.documentElement).getPropertyValue('--message').replace(/"/g,'');
+
+/* ===== FIREWORKS ===== */
+const fw = document.getElementById("fireworks");
+const fctx = fw.getContext("2d");
+fw.width = innerWidth;
+fw.height = innerHeight;
+
+let particles = [];
+const colors = ["red","yellow","pink","cyan","lime","orange","violet"];
+
+function firework() {
+  const x = Math.random()*fw.width;
+  const y = Math.random()*fw.height/2;
+  for(let i=0;i<50;i++){
+    particles.push({
+      x,y,
+      dx:(Math.random()-0.5)*6,
+      dy:(Math.random()-0.5)*6,
+      life:60,
+      c:colors[Math.floor(Math.random()*colors.length)]
+    });
+  }
+}
+
+function animateFW(){
+  fctx.clearRect(0,0,fw.width,fw.height);
+  particles.forEach((p,i)=>{
+    fctx.fillStyle=p.c;
+    fctx.fillRect(p.x,p.y,3,3);
+    p.x+=p.dx;
+    p.y+=p.dy;
+    p.life--;
+    if(p.life<=0) particles.splice(i,1);
+  });
+  requestAnimationFrame(animateFW);
+}
+
+setInterval(firework,700);
+animateFW();
+
+/* ===== CONFETTI ===== */
+const conf = document.getElementById("confetti");
+const cctx = conf.getContext("2d");
+conf.width = innerWidth;
+conf.height = innerHeight;
+
+let confetti = [];
+
+function blastConfetti(){
+  for(let i=0;i<150;i++){
+    confetti.push({
+      x:Math.random()*conf.width,
+      y:-10,
+      s:Math.random()*6+4,
+      dy:Math.random()*4+2,
+      c:colors[Math.floor(Math.random()*colors.length)]
+    });
+  }
+}
+
+function animateConfetti(){
+  cctx.clearRect(0,0,conf.width,conf.height);
+  confetti.forEach((c,i)=>{
+    cctx.fillStyle=c.c;
+    cctx.fillRect(c.x,c.y,c.s,c.s);
+    c.y+=c.dy;
+    if(c.y>conf.height) confetti.splice(i,1);
+  });
+  requestAnimationFrame(animateConfetti);
+}
+animateConfetti();
+
+/* ===== HEARTS ===== */
+setInterval(()=>{
+  const h=document.createElement("div");
+  h.className="heart";
+  h.innerHTML="❤️";
+  h.style.left=Math.random()*100+"vw";
+  h.style.fontSize=(12+Math.random()*20)+"px";
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),6000);
+},300);
+
+/* ===== CELEBRATE ===== */
+function celebrate(){
+  document.getElementById("cakeArea").style.display="block";
+  document.getElementById("music").play();
+  blastConfetti();
+
+  document.getElementById("qrcode").style.display="block";
+  new QRCode(document.getElementById("qrcode"), {
+    text: window.location.href,
+    width: 120,
+    height: 120
+  });
+}
+</script>
+
+</body>
+</html>
